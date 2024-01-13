@@ -1,19 +1,21 @@
 import 'package:equatable/equatable.dart';
 import 'package:flosha/base/base_status.dart';
 
-abstract class BaseState extends Equatable {
+abstract class BaseState<T> extends Equatable {
   final BaseStatus status;
   final String errorTitle;
   final String errorMessage;
-  final dynamic data;
+  final T? data;
+  final List<T>? list;
 
   const BaseState({
     required this.status,
     required this.errorTitle,
     required this.errorMessage,
-    required this.data,
+    this.data,
+    this.list,
   });
 
   @override
-  List<Object?> get props => [status, errorTitle, errorMessage, data];
+  List<Object?> get props => [status, errorTitle, errorMessage, data, list];
 }
