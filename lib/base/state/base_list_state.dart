@@ -1,18 +1,16 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/state/base_state.dart';
 
-class BaseListState<T> extends BaseState {
+class BaseListState<T> extends BaseState<T> {
   final int page;
   final int pageSize;
   final bool hasMoreData;
-  @override
-  final List<T>? data;
 
   const BaseListState({
     BaseStatus status = BaseStatus.initial,
     String? errorTitle = "",
     String? errorMessage = "",
-    this.data,
+    List<T>? data,
     this.page = 1,
     this.pageSize = 10,
     this.hasMoreData = false,
@@ -20,6 +18,7 @@ class BaseListState<T> extends BaseState {
           status: status,
           errorTitle: errorTitle ?? "",
           errorMessage: errorMessage ?? "",
+          list: data,
         );
 
   BaseListState<T> copyWith({
@@ -35,7 +34,7 @@ class BaseListState<T> extends BaseState {
         status: status ?? this.status,
         errorTitle: errorTitle ?? this.errorTitle,
         errorMessage: errorMessage ?? this.errorMessage,
-        data: data ?? this.data,
+        data: data ?? list,
         page: page ?? this.page,
         pageSize: pageSize ?? this.pageSize,
         hasMoreData: hasMoreData ?? this.hasMoreData,

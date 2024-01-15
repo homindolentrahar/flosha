@@ -78,7 +78,7 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   }
 
   void _successCallback(List<T> data, {int page = 1}) {
-    List<T>? temp = state.data;
+    List<T>? temp = state.list;
 
     if (state.page == 1) {
       empty();

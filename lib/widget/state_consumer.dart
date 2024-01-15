@@ -85,7 +85,11 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
         if (state.isLoading) {
           onLoading?.call();
         } else if (state.isSuccess) {
-          onSuccess?.call(state.data);
+          onSuccess?.call(
+            S.toString().contains("BaseListState")
+                ? state.list as T
+                : state.data as T,
+          );
         } else if (state.isError) {
           onError?.call(title: state.errorTitle, message: state.errorMessage);
         } else if (state.isEmpty) {
@@ -98,7 +102,11 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
             child: loadingWidget ?? const CircularProgressIndicator(),
           );
         } else if (state.isSuccess) {
-          return successWidget(state.data);
+          return successWidget(
+            S.toString().contains("BaseListState")
+                ? state.list as T
+                : state.data as T,
+          );
         } else if (state.isError) {
           return StateErrorContainer(config: errorConfig);
         } else if (state.isEmpty) {

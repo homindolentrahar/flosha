@@ -1,3 +1,4 @@
+import 'package:flosha/base/state/base_list_state.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,17 +25,17 @@ class StateContainerConfig {
   /// Custom image to replace default state container display - icon
   final ImageProvider? image;
 
-  StateContainerConfig(
+  StateContainerConfig({
     this.title,
     this.message,
     this.titleStyle,
     this.messageStyle,
     this.widget,
     this.image,
-  );
+  });
 }
 
-class StateContainer<B extends Cubit<S>, S extends BaseState<T>, T>
+class StateContainer<B extends Cubit<S>, S extends BaseState, T>
     extends StatelessWidget {
   /// Logic class that handle state to display data\
   /// Pass [B] type in the first generic type to define Logic class type
@@ -84,11 +85,27 @@ class StateContainer<B extends Cubit<S>, S extends BaseState<T>, T>
             child: loadingWidget ?? const CircularProgressIndicator(),
           );
         } else if (state.isSuccess) {
-          return onSuccess(state.data);
+          return onSuccess(
+            S.toString().contains("BaseListState")
+                ? state.list as T
+                : state.data as T,
+          );
         } else if (state.isError) {
-          return StateErrorContainer(config: errorConfig);
+          return StateErrorContainer(
+            config: errorConfig ??
+                StateContainerConfig(
+                  title: state.errorTitle,
+                  message: state.errorMessage,
+                ),
+          );
         } else if (state.isEmpty) {
-          return StateEmptyContainer(config: emptyConfig);
+          return StateEmptyContainer(
+            config: emptyConfig ??
+                StateContainerConfig(
+                  title: state.errorTitle,
+                  message: state.errorMessage,
+                ),
+          );
         }
 
         return const SizedBox.shrink();

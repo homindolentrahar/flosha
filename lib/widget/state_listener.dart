@@ -64,7 +64,11 @@ class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
         if (state.isLoading) {
           onLoading?.call();
         } else if (state.isSuccess) {
-          onSuccess?.call(state.data);
+          onSuccess?.call(
+            S.toString().contains("BaseListState")
+                ? state.list as T
+                : state.data as T,
+          );
         } else if (state.isError) {
           onError?.call(title: state.errorTitle, message: state.errorMessage);
         } else if (state.isEmpty) {

@@ -44,8 +44,8 @@ class StateErrorContainer extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  config?.title ?? "Cannot display data from data source",
-                  style: config?.titleStyle ?? const TextStyle(fontSize: 14),
+                  config?.message ?? "Cannot display data from data source",
+                  style: config?.messageStyle ?? const TextStyle(fontSize: 14),
                 ),
               ],
             ),
