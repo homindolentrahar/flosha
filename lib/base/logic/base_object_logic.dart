@@ -1,7 +1,6 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/logic/base_logic_mixin.dart';
 import 'package:flosha/base/state/base_object_state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
@@ -10,9 +9,9 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
     onInit();
   }
 
-  void onInit() {
-    debugPrint("onInit Logic::->");
-  }
+  void onInit() {}
+
+  Future<void> loadData();
 
   void refreshLoad();
 

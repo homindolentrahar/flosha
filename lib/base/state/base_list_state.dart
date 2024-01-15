@@ -5,6 +5,7 @@ class BaseListState<T> extends BaseState {
   final int page;
   final int pageSize;
   final bool hasMoreData;
+  @override
   final List<T>? data;
 
   const BaseListState({
@@ -39,14 +40,4 @@ class BaseListState<T> extends BaseState {
         pageSize: pageSize ?? this.pageSize,
         hasMoreData: hasMoreData ?? this.hasMoreData,
       );
-
-  bool get isInitial => status == BaseStatus.initial;
-
-  bool get isLoading => status == BaseStatus.loading;
-
-  bool get isSuccess => status == BaseStatus.success;
-
-  bool get isError => status == BaseStatus.error;
-
-  bool get isEmpty => status == BaseStatus.empty;
 }

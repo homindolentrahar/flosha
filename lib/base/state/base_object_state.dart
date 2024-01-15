@@ -1,18 +1,17 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/state/base_state.dart';
 
-class BaseObjectState<T> extends BaseState {
-  final T? data;
-
+class BaseObjectState<T> extends BaseState<T> {
   const BaseObjectState({
     BaseStatus status = BaseStatus.initial,
     String? errorTitle = "",
     String? errorMessage = "",
-    this.data,
+    T? data,
   }) : super(
           status: status,
           errorTitle: errorTitle ?? "",
           errorMessage: errorMessage ?? "",
+          data: data,
         );
 
   BaseObjectState<T> copyWith({

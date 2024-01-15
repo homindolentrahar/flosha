@@ -18,4 +18,14 @@ abstract class BaseState<T> extends Equatable {
 
   @override
   List<Object?> get props => [status, errorTitle, errorMessage, data, list];
+
+  bool get isInitial => status == BaseStatus.initial;
+
+  bool get isLoading => status == BaseStatus.loading;
+
+  bool get isSuccess => status == BaseStatus.success;
+
+  bool get isError => status == BaseStatus.error;
+
+  bool get isEmpty => status == BaseStatus.empty;
 }
