@@ -1,5 +1,6 @@
 part of '../state_container.dart';
 
+/// Default widget that will displayed when state is **Empty**
 class StateEmptyContainer extends StatelessWidget {
   /// Config for empty widget
   final StateContainerConfig? config;

@@ -1,4 +1,4 @@
-import 'package:flosha/base/state/base_list_state.dart';
+import 'package:flosha/base/logic/base_list_logic.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,6 +25,7 @@ class StateContainerConfig {
   /// Custom image to replace default state container display - icon
   final ImageProvider? image;
 
+  /// Config class to handle properties that will displayed on widget with a certain state
   StateContainerConfig({
     this.title,
     this.message,
@@ -86,9 +87,7 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
           );
         } else if (state.isSuccess) {
           return onSuccess(
-            S.toString().contains("BaseListState")
-                ? state.list as T
-                : state.data as T,
+            B is BaseListLogic<S>? ? state.list as T : state.data as T,
           );
         } else if (state.isError) {
           return StateErrorContainer(

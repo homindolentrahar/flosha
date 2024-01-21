@@ -1,20 +1,26 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/logic/base_logic_mixin.dart';
 import 'package:flosha/base/state/base_list_state.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     with BaseLogicMixin {
+  /// Base logic or controller class that handle your state
+  /// Handle state that wrap data with type List of Object or [List<T>]
+  /// Write your business logic here and emit the necessary state to update UI with corresponding data
   BaseListLogic(super.initialState) {
     onInit();
   }
 
-  void onInit() {
-    debugPrint("onInit Logic::->");
-  }
+  /// Overridable function that will be executed when logic class initialized for the first time
+  void onInit() {}
 
-  void refreshLoad();
+  /// Overridable function to load data from remote or local data source
+  Future<void> loadData();
+
+  /// Overridable function to refresh fetching data from remote or local data source
+  /// Usually used in pull to refresh scenario
+  void refreshData();
 
   /// Invoke a **Loading** state
   void loading() {
@@ -22,7 +28,8 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   }
 
   /// Invoke a **Success** state
-  /// Pass down the **data**
+  /// Pass down the [data] with corresponding type [List<T>]
+  /// [page] parameters is optional,to indicate the current page in list of data with pagination
   void success(List<T>? data, {int page = 1}) {
     emit(
       state.copyWith(
@@ -34,7 +41,7 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   }
 
   /// Invoke a **Error** state
-  /// Pass down the **error**
+  /// Pass down the [errorTitle] and [errorMessage]
   void error({
     String? errorTitle,
     String? errorMessage,
@@ -55,10 +62,14 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     emit(state.copyWith(status: BaseStatus.empty, data: []));
   }
 
+  /// Function to change the page size or how many items will be loaded in one page with pagination
   void changePageSize(int size) {
     emit(state.copyWith(pageSize: size));
   }
 
+  /// Function to populate fetched data into UI
+  /// Will emit **Success** state when the fetching process is considered success
+  /// Or emit **Error** state when the fetching process is considered failed, indicated by dirty [errorMessage] or [errorMessage] is not empty
   void populateData({
     List<T>? data,
     String errorTitle = "",
@@ -77,11 +88,17 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     _successCallback(data ?? [], page: page);
   }
 
+  /// Function to clear list of data saved in a state
+  void _clearListData() {
+    emit(state.copyWith(data: []));
+  }
+
+  /// Callback function that executed when fetching process considered success
   void _successCallback(List<T> data, {int page = 1}) {
     List<T>? temp = state.list;
 
     if (state.page == 1) {
-      empty();
+      _clearListData();
     }
 
     temp?.addAll(data);
@@ -93,6 +110,7 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     _finishRefresh();
   }
 
+  /// Callback function that executed when fetching process considered failed
   void _errorCallback({
     String? errorTitle,
     String? errorMessage,
@@ -107,6 +125,7 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     _finishRefresh();
   }
 
+  /// Function to dismiss loading indicator on pull to refresh scenario
   void _finishRefresh() {
     if (refreshController.isRefresh) {
       refreshController.refreshCompleted();

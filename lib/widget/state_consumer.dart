@@ -1,3 +1,4 @@
+import 'package:flosha/base/logic/base_list_logic.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
 import 'package:flutter/material.dart';
@@ -29,16 +30,14 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
   /// Receive [data] as parameter with type [T] from [state.data]
   final Widget Function(T? data)? onSuccess;
 
-  /// Callback function to execute code when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
+  /// Callback function to execute code when state is `error`\
+  /// Receive [title] and [message] as parameter
   final Widget Function({String title, String message})? onError;
 
-  /// Callback function to execute code when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
+  /// Callback function to execute code when state is `loading`\
   final Widget Function()? onLoading;
 
-  /// Callback function to execute code when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
+  /// Callback function to execute code when state is `empty`\
   final Widget Function()? onEmpty;
 
   /// Function to determine wether to rebuild the container based on certain condition\
@@ -86,9 +85,7 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
           onLoading?.call();
         } else if (state.isSuccess) {
           onSuccess?.call(
-            S.toString().contains("BaseListState")
-                ? state.list as T
-                : state.data as T,
+            B is BaseListLogic<S> ? state.list as T : state.data as T,
           );
         } else if (state.isError) {
           onError?.call(title: state.errorTitle, message: state.errorMessage);
@@ -103,9 +100,7 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
           );
         } else if (state.isSuccess) {
           return successWidget(
-            S.toString().contains("BaseListState")
-                ? state.list as T
-                : state.data as T,
+            B is BaseListLogic<S> ? state.list as T : state.data as T,
           );
         } else if (state.isError) {
           return StateErrorContainer(config: errorConfig);

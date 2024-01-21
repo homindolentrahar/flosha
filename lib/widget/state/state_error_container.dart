@@ -1,5 +1,6 @@
 part of '../state_container.dart';
 
+/// Default widget that will displayed when state is **Error**
 class StateErrorContainer extends StatelessWidget {
   /// Config for error widget
   final StateContainerConfig? config;
