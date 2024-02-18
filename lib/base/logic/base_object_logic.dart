@@ -31,6 +31,8 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
   /// Pass down the [data] with corresponding type [T]
   void success(T? data) {
     emit(state.copyWith(status: BaseStatus.success, data: data));
+
+    _finishRefresh();
   }
 
   /// Invoke a **Error** state
@@ -43,41 +45,13 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
         errorMessage: errorMessage,
       ),
     );
+
+    _finishRefresh();
   }
 
   /// Invoke a **Empty** state
   void empty() {
     emit(state.copyWith(status: BaseStatus.empty, data: null));
-  }
-
-  /// Function to populate fetched data into UI
-  /// Will emit **Success** state when the fetching process is considered success
-  /// Or emit **Error** state when the fetching process is considered failed, indicated by dirty [errorMessage] or [errorMessage] is not empty
-  void populateData({
-    T? data,
-    String errorTitle = "",
-    String errorMessage = "",
-  }) {
-    if (errorMessage.isNotEmpty) {
-      _errorCallback(errorTitle: errorTitle, errorMessage: errorMessage);
-      return;
-    }
-
-    _successCallback(data);
-  }
-
-  /// Callback function that executed when fetching process considered success
-  void _successCallback(T? data) {
-    success(data);
-
-    _finishRefresh();
-  }
-
-  /// Callback function that executed when fetching process considered failed
-  void _errorCallback({String? errorTitle, String? errorMessage}) {
-    this.error(errorTitle: errorTitle, errorMessage: errorMessage);
-
-    _finishRefresh();
   }
 
   /// Function to dismiss loading indicator on pull to refresh scenario

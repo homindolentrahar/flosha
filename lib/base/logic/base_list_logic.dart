@@ -12,11 +12,18 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
     onInit();
   }
 
+  /// Getter for page size in pagination
+  /// Override this with the amount of item you want to load
+  int get pageSize => 10;
+
   /// Overridable function that will be executed when logic class initialized for the first time
   void onInit() {}
 
   /// Overridable function to load data from remote or local data source
   Future<void> loadData();
+
+  /// Overridable function to load next data from remote or local data source
+  void loadNextData();
 
   /// Overridable function to refresh fetching data from remote or local data source
   /// Usually used in pull to refresh scenario
@@ -24,20 +31,35 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
 
   /// Invoke a **Loading** state
   void loading() {
-    emit(state.copyWith(status: BaseStatus.loading));
+    emit(
+      state.copyWith(
+        status: state.hasMoreData ? BaseStatus.loadMore : BaseStatus.loading,
+      ),
+    );
   }
 
   /// Invoke a **Success** state
   /// Pass down the [data] with corresponding type [List<T>]
   /// [page] parameters is optional,to indicate the current page in list of data with pagination
-  void success(List<T>? data, {int page = 1}) {
+  void success({List<T> data = const [], int page = 1}) {
+    List<T> temp = state.list ?? [];
+
+    if (page == 1) {
+      temp = [];
+    }
+
+    temp.addAll(data);
+
     emit(
       state.copyWith(
         status: BaseStatus.success,
-        data: data,
+        data: temp,
         page: page,
+        hasMoreData: !(data.length < state.pageSize),
       ),
     );
+
+    _finishRefresh();
   }
 
   /// Invoke a **Error** state
@@ -45,16 +67,16 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   void error({
     String? errorTitle,
     String? errorMessage,
-    int page = 1,
   }) {
     emit(
       state.copyWith(
         status: BaseStatus.error,
         errorTitle: errorTitle,
         errorMessage: errorMessage,
-        page: page,
       ),
     );
+
+    _finishRefresh();
   }
 
   /// Invoke a **Empty** state
@@ -64,65 +86,7 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
 
   /// Function to change the page size or how many items will be loaded in one page with pagination
   void changePageSize(int size) {
-    emit(state.copyWith(pageSize: size));
-  }
-
-  /// Function to populate fetched data into UI
-  /// Will emit **Success** state when the fetching process is considered success
-  /// Or emit **Error** state when the fetching process is considered failed, indicated by dirty [errorMessage] or [errorMessage] is not empty
-  void populateData({
-    List<T>? data,
-    String errorTitle = "",
-    String errorMessage = "",
-    int page = 1,
-  }) {
-    if (errorMessage.isNotEmpty) {
-      _errorCallback(
-        errorTitle: errorTitle,
-        errorMessage: errorMessage,
-        page: page,
-      );
-      return;
-    }
-
-    _successCallback(data ?? [], page: page);
-  }
-
-  /// Function to clear list of data saved in a state
-  void _clearListData() {
-    emit(state.copyWith(data: []));
-  }
-
-  /// Callback function that executed when fetching process considered success
-  void _successCallback(List<T> data, {int page = 1}) {
-    List<T>? temp = state.list;
-
-    if (state.page == 1) {
-      _clearListData();
-    }
-
-    temp?.addAll(data);
-
-    success(temp, page: page);
-
-    emit(state.copyWith(hasMoreData: !(data.length < state.pageSize)));
-
-    _finishRefresh();
-  }
-
-  /// Callback function that executed when fetching process considered failed
-  void _errorCallback({
-    String? errorTitle,
-    String? errorMessage,
-    int page = 1,
-  }) {
-    this.error(
-      errorTitle: errorTitle,
-      errorMessage: errorMessage,
-      page: page,
-    );
-
-    _finishRefresh();
+    emit(state.copyWith(pageSize: size, status: state.status));
   }
 
   /// Function to dismiss loading indicator on pull to refresh scenario

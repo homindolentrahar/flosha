@@ -24,19 +24,18 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
   BaseLogicDataType get dataType;
 
   /// Function to save Form's value into current state of the key
-  void saveForm() {
-    return formKey.currentState?.save();
-  }
+  void saveForm() => formKey.currentState?.save();
 
   /// Function to save Form's value into current state of the key and validate the Form's value with the available validators
   bool saveAndValidateForm() {
     final isSaveAndValidate = formKey.currentState?.saveAndValidate() ?? false;
-    if (isSaveAndValidate) {
-      emit(state.copyWith(
+
+    emit(
+      state.copyWith(
         formData: formKey.value,
         errors: formKey.errors,
-      ));
-    }
+      ),
+    );
 
     return isSaveAndValidate;
   }
@@ -84,36 +83,13 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
   }
 
   /// Function to populate initial data or value into Form's state
-  void populateInitialFormData(Map<String, dynamic> initialData) {
-    emit(state.copyWith(
-      formData: initialData,
-    ));
-  }
-
-  /// Function to populate fetched data into UI
-  /// Will emit **Success** state when the fetching process is considered success
-  /// Or emit **Error** state when the fetching process is considered failed, indicated by dirty [errorMessage] or [errorMessage] is not empty
-  void populateData({
-    T? object,
-    List<T>? list,
-    String errorTitle = "",
-    String errorMessage = "",
-  }) {
-    if (errorMessage.isNotEmpty) {
-      _errorCallback(errorTitle: errorTitle, errorMessage: errorMessage);
-      return;
-    }
-
-    _successCallback(object: object, list: list);
-  }
-
-  /// Callback function that executed when fetching process considered success
-  void _successCallback({T? object, List<T>? list}) {
-    success(object: object, list: list);
-  }
-
-  /// Callback function that executed when fetching process considered failed
-  void _errorCallback({String? errorTitle, String? errorMessage}) {
-    this.error(errorTitle: errorTitle, errorMessage: errorMessage);
+  void initialFormData(Map<String, dynamic> initialData) {
+    emit(
+      state.copyWith(
+        status: BaseStatus.initial,
+        formData: initialData,
+        errors: {},
+      ),
+    );
   }
 }

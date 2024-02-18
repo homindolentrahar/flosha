@@ -31,6 +31,9 @@ abstract class BaseState<T> extends Equatable {
   /// Checking if state is [BaseStatus.loading]
   bool get isLoading => status == BaseStatus.loading;
 
+  /// Checking if state is [BaseStatus.loadMore]
+  bool get isLoadMore => status == BaseStatus.loadMore;
+
   /// Checking if state is [BaseStatus.success]
   bool get isSuccess => status == BaseStatus.success;
 

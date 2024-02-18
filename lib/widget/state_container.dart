@@ -79,15 +79,15 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
   Widget build(BuildContext context) {
     return BlocBuilder<B, S>(
       bloc: logic,
-      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      buildWhen: buildWhen,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
             child: loadingWidget ?? const CircularProgressIndicator(),
           );
-        } else if (state.isSuccess) {
+        } else if (state.isSuccess || state.isLoadMore) {
           return onSuccess(
-            B is BaseListLogic<S>? ? state.list as T : state.data as T,
+            logic is BaseListLogic ? state.list as T : state.data as T,
           );
         } else if (state.isError) {
           return StateErrorContainer(
