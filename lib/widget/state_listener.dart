@@ -1,4 +1,3 @@
-import 'package:flosha/base/logic/base_list_logic.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
 import 'package:flutter/material.dart';

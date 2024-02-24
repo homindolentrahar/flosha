@@ -22,14 +22,12 @@ class BaseFormState<T> extends BaseState<T> {
     String? errorMessage = "",
     this.errors = const {},
     this.formData = const {},
-    T? data,
-    List<T>? list,
+    dynamic data,
   }) : super(
           status: status,
           errorTitle: errorTitle ?? "",
           errorMessage: errorMessage ?? "",
           data: data,
-          list: list,
         );
 
   /// Function to alter or update the existing state instance with new values
@@ -37,8 +35,7 @@ class BaseFormState<T> extends BaseState<T> {
     BaseStatus? status,
     String? errorTitle,
     String? errorMessage,
-    T? data,
-    List<T>? list,
+    dynamic data,
     Map<String, String>? errors,
     Map<String, dynamic>? formData,
   }) =>
@@ -49,6 +46,5 @@ class BaseFormState<T> extends BaseState<T> {
         data: data ?? this.data,
         errors: errors ?? this.errors,
         formData: formData ?? this.formData,
-        list: list ?? this.list,
       );
 }

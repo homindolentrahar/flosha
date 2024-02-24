@@ -17,8 +17,7 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
   }
 
   /// [formKey] is a key to track form's state and value
-  /// Override this with your own Globalkey
-  GlobalKey<FormBuilderState> get formKey;
+  final GlobalKey<FormBuilderState> formKey = GlobalKey<FormBuilderState>();
 
   /// Getter to determine wether the result of Form's operation return data as an object or list
   BaseLogicDataType get dataType;
@@ -27,7 +26,7 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
   void saveForm() => formKey.currentState?.save();
 
   /// Function to save Form's value into current state of the key and validate the Form's value with the available validators
-  bool saveAndValidateForm() {
+  bool get saveAndValidateForm {
     final isSaveAndValidate = formKey.currentState?.saveAndValidate() ?? false;
 
     emit(
@@ -58,10 +57,9 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
   }
 
   /// Invoke a **Success** state
-  /// Pass down the [object] with corresponding type [T]
-  /// Or pass down the [list] with corresponding type [List<T>]
-  void success({T? object, List<T>? list}) {
-    emit(state.copyWith(status: BaseStatus.success, data: object, list: list));
+  /// Pass down the [data] with corresponding type [T]
+  void success({T? data}) {
+    emit(state.copyWith(status: BaseStatus.success, data: data));
   }
 
   /// Invoke a **Error** state
@@ -79,7 +77,12 @@ abstract class BaseFormLogic<T> extends Cubit<BaseFormState<T>>
 
   /// Invoke a **Empty** state
   void empty() {
-    emit(state.copyWith(status: BaseStatus.empty, data: null, list: []));
+    emit(
+      state.copyWith(
+        status: BaseStatus.empty,
+        data: dataType == BaseLogicDataType.object ? null : [],
+      ),
+    );
   }
 
   /// Function to populate initial data or value into Form's state

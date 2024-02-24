@@ -1,17 +1,13 @@
-import 'package:flosha/base/logic/base_list_logic.dart';
-import 'package:flosha/base/state/base_state.dart';
+import 'package:flosha/base/error_state_wrapper.dart';
+import 'package:flosha/base/state/base_form_state.dart';
 import 'package:flosha/flosha.dart';
+import 'package:flosha/widget/state_widget_config.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-class StateForm<B extends Cubit<S>, S extends BaseState<T>, T>
-    extends StatelessWidget {
+class StateForm<T> extends StatelessWidget {
   /// Logic class that handle state to display data\
-  /// Pass [B] type in the first generic type to define Logic class type
-  final B logic;
-
-  /// Form key to save the form's state & value
-  final GlobalKey<FormBuilderState> formKey;
+  /// Pass [T] type to define Logic's data type
+  final BaseFormLogic<T> logic;
 
   /// Auto-validate mode for auto validating the Form state
   final AutovalidateMode? validateMode;
@@ -23,70 +19,55 @@ class StateForm<B extends Cubit<S>, S extends BaseState<T>, T>
   final Widget? loadingWidget;
 
   /// Config for empty widget that will shown when state is `empty`
-  final StateContainerConfig? emptyConfig;
+  final StateWidgetConfig? emptyConfig;
 
   /// Config for error widget that will shown when state is `error`
-  final StateContainerConfig? errorConfig;
+  final StateWidgetConfig? errorConfig;
+
+  /// Config for Submit buttom
+  final StateFormSubmitButtonConfig? submitButtonConfig;
 
   /// Widget that represents fields inside Form
   final Widget child;
-
-  /// Custom button widget to replace the default form button
-  final Widget? buttonWidget;
 
   /// Callback function to handle Form submission
   final VoidCallback? onSubmit;
 
   /// Callback function to execute when state is changed\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(S? data)? onListen;
-
-  /// Callback function to do execute when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(T? data)? onSuccess;
-
-  /// Callback function to execute code when state is `error`\
-  /// Receive [title] and [message] as parameter
-  final Widget Function({String title, String message})? onError;
+  /// Receive [result] as parameter with the type of Either which return error on the Left side, and data on the Right side
+  final Function(Either<ErrorStateWrapper, T> result) onListen;
 
   /// Callback function to execute code when state is `loading`\
-  final Widget Function()? onLoading;
+  final VoidCallback? onLoading;
 
-  /// Callback function to execute code when state is `empty`\
-  final Widget Function()? onEmpty;
+  /// Callback function to execute code when state is `empty`
+  final VoidCallback? onEmpty;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
   /// Default: Container will be rebuild when [previous] state is not same as [next] state\
-  /// [S] type in the second generic type is to define Logic state type\
-  final bool Function(S, S)? buildWhen;
+  final bool Function(BaseFormState, BaseFormState)? buildWhen;
 
   /// Function to determine wether to listen to the state changes on certain condition\
   /// Return [bool] value, this callback will be called when value is `true`\
   /// Default: Callback will be called when [previous] state is not same as [next] state\
-  /// [S] type in the second generic type is to define Logic state type\
-  final bool Function(S, S)? listenWhen;
+  final bool Function(BaseFormState, BaseFormState)? listenWhen;
 
   /// Container that reactive to state changes that handle Form functionality. Used handle Form state that emitted from `Logic` class\
-  /// First  generic type [B] define the Logic class type\
-  /// Second generic type [S] define the Logic's state type\
   /// Third generic type [T] define the data type returned when [state] is `Success`
   const StateForm({
     super.key,
     required this.logic,
-    required this.formKey,
     this.validateMode,
     this.initialValue = const {},
     this.loadingWidget,
     this.emptyConfig,
     this.errorConfig,
+    this.submitButtonConfig,
     required this.child,
-    this.buttonWidget,
     required this.onListen,
-    this.onSuccess,
     this.onLoading,
     this.onEmpty,
-    this.onError,
     this.onSubmit,
     this.buildWhen,
     this.listenWhen,
@@ -94,55 +75,73 @@ class StateForm<B extends Cubit<S>, S extends BaseState<T>, T>
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<B, S>(
+    return BlocListener<BaseFormLogic, BaseFormState>(
       bloc: logic,
       listenWhen: listenWhen ?? (previous, next) => previous != next,
       listener: (ctx, state) {
-        onListen?.call(state);
-
         if (state.isLoading) {
           onLoading?.call();
         } else if (state.isSuccess) {
-          onSuccess?.call(
-            B is BaseListLogic<S>? ? state.list as T : state.data as T,
-          );
+          onListen.call(right(
+            logic.dataType == BaseLogicDataType.list
+                ? state.list as T
+                : state.data as T,
+          ));
         } else if (state.isError) {
-          onError?.call(title: state.errorTitle, message: state.errorMessage);
+          onListen.call(left(
+            ErrorStateWrapper(
+              state.errorTitle,
+              state.errorMessage,
+            ),
+          ));
         } else if (state.isEmpty) {
-          onEmpty?.call();
+          onLoading?.call();
         }
       },
       child: FormBuilder(
-        key: formKey,
+        key: logic.formKey,
         autovalidateMode: validateMode,
         initialValue: initialValue,
         clearValueOnUnregister: true,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            child,
-            const SizedBox(height: 16),
-            BlocBuilder<B, S>(
-              bloc: logic,
-              buildWhen: buildWhen ?? (previous, next) => previous != next,
-              builder: (ctx, state) {
-                if (state.isLoading) {
-                  return Center(
-                    child: loadingWidget ?? const CircularProgressIndicator(),
-                  );
-                } else if (state.isSuccess) {
-                  return buttonWidget ??
-                      ElevatedButton(
-                        onPressed: onSubmit,
-                        child: const Text("Submit"),
-                      );
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              child,
+              SizedBox(height: submitButtonConfig?.spaceFromFields ?? 32),
+              Visibility(
+                visible: submitButtonConfig?.showDefaultSubmitButton ?? true,
+                child: BlocBuilder<BaseFormLogic<T>, BaseFormState<T>>(
+                  bloc: logic,
+                  buildWhen: buildWhen ?? (previous, next) => previous != next,
+                  builder: (ctx, state) {
+                    return SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      child: submitButtonConfig?.buttonWidget ??
+                          ElevatedButton(
+                            onPressed: state.isLoading ? null : onSubmit,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.all(16),
+                              elevation: 0,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                            ),
+                            child: Text(
+                              submitButtonConfig?.buttonText ?? "Submit",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
+                            ),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

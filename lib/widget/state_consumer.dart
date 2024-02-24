@@ -1,6 +1,7 @@
-import 'package:flosha/base/logic/base_list_logic.dart';
+import 'package:flosha/base/error_state_wrapper.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
+import 'package:flosha/widget/state_widget_config.dart';
 import 'package:flutter/material.dart';
 
 class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
@@ -13,32 +14,21 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
   final Widget? loadingWidget;
 
   /// Config for empty widget that will shown when state is `empty`
-  final StateContainerConfig? emptyConfig;
+  final StateWidgetConfig? emptyConfig;
 
   /// Config for error widget that will shown when state is `error`
-  final StateContainerConfig? errorConfig;
+  final StateWidgetConfig? errorConfig;
 
   /// Callback function to display desired widget when state is `success`\
   /// Receive [data] as parameter with type [T] from [state.data]
   final Widget Function(T? data) successWidget;
 
   /// Callback function to execute when state is changed\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(S? data)? onListen;
-
-  /// Callback function to do execute when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(T? data)? onSuccess;
-
-  /// Callback function to execute code when state is `error`\
-  /// Receive [title] and [message] as parameter
-  final Widget Function({String title, String message})? onError;
+  /// Receive [result] as parameter with the type of Either which return error on the Left side, and data on the Right side
+  final Function(Either<ErrorStateWrapper, T> result) onListen;
 
   /// Callback function to execute code when state is `loading`\
   final Widget Function()? onLoading;
-
-  /// Callback function to execute code when state is `empty`\
-  final Widget Function()? onEmpty;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -64,10 +54,7 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
     this.errorConfig,
     required this.successWidget,
     required this.onListen,
-    this.onSuccess,
     this.onLoading,
-    this.onEmpty,
-    this.onError,
     this.buildWhen,
     this.listenWhen,
   });
@@ -79,19 +66,26 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
       listenWhen: listenWhen ?? (previous, next) => previous != next,
       buildWhen: buildWhen ?? (previous, next) => previous != next,
       listener: (ctx, state) {
-        onListen?.call(state);
+        late Either<ErrorStateWrapper, T> result;
 
         if (state.isLoading) {
           onLoading?.call();
         } else if (state.isSuccess) {
-          onSuccess?.call(
+          result = right(
             B is BaseListLogic<S> ? state.list as T : state.data as T,
           );
         } else if (state.isError) {
-          onError?.call(title: state.errorTitle, message: state.errorMessage);
+          result = left(
+            ErrorStateWrapper(
+              state.errorTitle,
+              state.errorMessage,
+            ),
+          );
         } else if (state.isEmpty) {
-          onEmpty?.call();
+          onLoading?.call();
         }
+
+        onListen.call(result);
       },
       builder: (ctx, state) {
         if (state.isLoading) {

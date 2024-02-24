@@ -3,7 +3,7 @@ part of '../state_container.dart';
 /// Default widget that will displayed when state is **Error**
 class StateErrorContainer extends StatelessWidget {
   /// Config for error widget
-  final StateContainerConfig? config;
+  final StateWidgetConfig? config;
 
   /// Whether to show [retryWidget] (if provided) or retry button
   final bool isShowRetry;

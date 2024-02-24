@@ -1,40 +1,11 @@
 import 'package:flosha/base/logic/base_list_logic.dart';
 import 'package:flosha/base/state/base_state.dart';
+import 'package:flosha/widget/state_widget_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part './state/state_error_container.dart';
 part './state/state_empty_container.dart';
-
-class StateContainerConfig {
-  /// [title] that will displayed in the state container display
-  final String? title;
-
-  /// [message] that will displayed in the state container display
-  final String? message;
-
-  /// Textstyle for [title]
-  final TextStyle? titleStyle;
-
-  /// Textstyle for [message]
-  final TextStyle? messageStyle;
-
-  /// Custom widget to replace default state container display
-  final Widget? widget;
-
-  /// Custom image to replace default state container display - icon
-  final ImageProvider? image;
-
-  /// Config class to handle properties that will displayed on widget with a certain state
-  StateContainerConfig({
-    this.title,
-    this.message,
-    this.titleStyle,
-    this.messageStyle,
-    this.widget,
-    this.image,
-  });
-}
 
 class StateContainer<B extends Cubit<S>, S extends BaseState, T>
     extends StatelessWidget {
@@ -46,10 +17,10 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
   final Widget? loadingWidget;
 
   /// Config for empty widget that will shown when state is `empty`
-  final StateContainerConfig? emptyConfig;
+  final StateWidgetConfig? emptyConfig;
 
   /// Config for error widget that will shown when state is `error`
-  final StateContainerConfig? errorConfig;
+  final StateWidgetConfig? errorConfig;
 
   /// Callback function to display desired widget when state is `success`\
   /// Receive [data] as parameter with type [T] from [state.data]
@@ -79,7 +50,7 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
   Widget build(BuildContext context) {
     return BlocBuilder<B, S>(
       bloc: logic,
-      buildWhen: buildWhen,
+      buildWhen: buildWhen ?? (previous, next) => previous != next,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
@@ -92,7 +63,7 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
         } else if (state.isError) {
           return StateErrorContainer(
             config: errorConfig ??
-                StateContainerConfig(
+                StateWidgetConfig(
                   title: state.errorTitle,
                   message: state.errorMessage,
                 ),
@@ -100,7 +71,7 @@ class StateContainer<B extends Cubit<S>, S extends BaseState, T>
         } else if (state.isEmpty) {
           return StateEmptyContainer(
             config: emptyConfig ??
-                StateContainerConfig(
+                StateWidgetConfig(
                   title: state.errorTitle,
                   message: state.errorMessage,
                 ),
