@@ -1,6 +1,6 @@
 name: flosha
-description: "Boilerplate for state handling with BLoC pattern"
-version: 0.0.1
+description: "Boilerplate for handling state with BLoC pattern in a smooth way"
+version: 1.0.0
 homepage:
 
 environment:

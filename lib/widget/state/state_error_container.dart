@@ -36,7 +36,7 @@ class StateErrorContainer extends StatelessWidget {
                     : const Icon(Icons.warning_outlined, size: 48),
                 const SizedBox(height: 16),
                 Text(
-                  config?.title ?? "Data not found",
+                  config?.title ?? "Something happened",
                   style: config?.titleStyle ??
                       const TextStyle(
                         fontSize: 24,
@@ -45,7 +45,7 @@ class StateErrorContainer extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  config?.message ?? "Cannot display data from data source",
+                  config?.message ?? "Cannot load data from data source",
                   style: config?.messageStyle ?? const TextStyle(fontSize: 14),
                 ),
               ],

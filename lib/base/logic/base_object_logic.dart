@@ -1,6 +1,7 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/logic/base_logic_mixin.dart';
 import 'package:flosha/base/state/base_object_state.dart';
+import 'package:flosha/util/helper/logger_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
@@ -11,6 +12,9 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
   BaseObjectLogic(super.initialState) {
     onInit();
   }
+
+  /// Getter for getting data from emitted state
+  T? get data => state.data;
 
   /// Overridable function that will be executed when logic class initialized for the first time
   void onInit() {}
@@ -45,6 +49,8 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
         errorMessage: errorMessage,
       ),
     );
+
+    LoggerHelper.create().error("$errorTitle: $errorMessage");
 
     _finishRefresh();
   }

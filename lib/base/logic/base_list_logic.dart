@@ -1,6 +1,7 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/logic/base_logic_mixin.dart';
 import 'package:flosha/base/state/base_list_state.dart';
+import 'package:flosha/util/helper/logger_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
@@ -11,6 +12,9 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   BaseListLogic(super.initialState) {
     onInit();
   }
+
+  /// Getter for getting data from emitted state
+  List<T> get data => state.list ?? [];
 
   /// Getter for page size in pagination
   /// Override this with the amount of item you want to load
@@ -42,10 +46,14 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
   /// Pass down the [data] with corresponding type [List<T>]
   /// [page] parameters is optional,to indicate the current page in list of data with pagination
   void success({List<T> data = const [], int page = 1}) {
+    if (data.isEmpty) {
+      return emit(state.copyWith(status: BaseStatus.empty));
+    }
+
     List<T> temp = state.list ?? [];
 
     if (page == 1) {
-      temp = [];
+      temp.clear();
     }
 
     temp.addAll(data);
@@ -75,6 +83,8 @@ abstract class BaseListLogic<T> extends Cubit<BaseListState<T>>
         errorMessage: errorMessage,
       ),
     );
+
+    LoggerHelper.create().error("$errorTitle: $errorMessage");
 
     _finishRefresh();
   }

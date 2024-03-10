@@ -1,3 +1,4 @@
+import 'package:flosha/base/error_state_wrapper.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
 import 'package:flutter/material.dart';
@@ -26,8 +27,8 @@ class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
   final Widget Function()? onEmpty;
 
   /// Callback function to execute when state is changed\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(S? data)? onListen;
+  /// Receive [result] as parameter with the type of Either which return error on the Left side, and data on the Right side
+  final Function(Either<ErrorStateWrapper, T> result) onListen;
 
   /// Function to determine wether to listen to the state changes on certain condition\
   /// Return [bool] value, this callback will be called when value is `true`\
@@ -43,12 +44,12 @@ class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
     super.key,
     required this.logic,
     required this.child,
+    required this.onListen,
     this.onSuccess,
     this.listenWhen,
     this.onError,
     this.onLoading,
     this.onEmpty,
-    this.onListen,
   });
 
   @override
@@ -57,16 +58,23 @@ class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
       bloc: logic,
       listenWhen: listenWhen,
       listener: (ctx, state) {
-        onListen?.call(state);
-
         if (state.isLoading) {
           onLoading?.call();
         } else if (state.isSuccess) {
-          onSuccess?.call(
-            B is BaseListLogic<S>? ? state.list as T : state.data as T,
+          onListen.call(
+            right(
+              B is BaseListLogic<S>? ? state.list as T : state.data as T,
+            ),
           );
         } else if (state.isError) {
-          onError?.call(title: state.errorTitle, message: state.errorMessage);
+          onListen.call(
+            left(
+              ErrorStateWrapper(
+                state.errorTitle,
+                state.errorMessage,
+              ),
+            ),
+          );
         } else if (state.isEmpty) {
           onEmpty?.call();
         }
