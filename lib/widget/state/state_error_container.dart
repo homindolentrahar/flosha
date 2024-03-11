@@ -1,4 +1,5 @@
-part of '../state_container.dart';
+import 'package:flosha/widget/core/state_widget_config.dart';
+import 'package:flutter/material.dart';
 
 /// Default widget that will displayed when state is **Error**
 class StateErrorContainer extends StatelessWidget {

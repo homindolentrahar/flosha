@@ -1,7 +1,7 @@
 import 'package:flosha/base/error_state_wrapper.dart';
 import 'package:flosha/base/state/base_form_state.dart';
 import 'package:flosha/flosha.dart';
-import 'package:flosha/widget/state_widget_config.dart';
+import 'package:flosha/widget/core/state_widget_config.dart';
 import 'package:flutter/material.dart';
 
 class StateForm<T> extends StatelessWidget {

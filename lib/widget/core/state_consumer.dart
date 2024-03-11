@@ -3,7 +3,9 @@ import 'package:flosha/base/state/base_list_state.dart';
 import 'package:flosha/base/state/base_object_state.dart';
 import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
-import 'package:flosha/widget/state_widget_config.dart';
+import 'package:flosha/widget/core/state_widget_config.dart';
+import 'package:flosha/widget/state/state_empty_container.dart';
+import 'package:flosha/widget/state/state_error_container.dart';
 import 'package:flutter/material.dart';
 
 class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
