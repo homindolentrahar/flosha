@@ -13,6 +13,10 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
   /// Logic class that handle state to display data\
   final B logic;
 
+  /// Wether to use SmartRefresher outside the StateContainer or not
+  /// Default [false].
+  final bool useExternalRefresher;
+
   /// Custom widget to replace loading widget
   final Widget? loadingWidget;
 
@@ -39,6 +43,7 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
   const StateContainer({
     super.key,
     required this.logic,
+    this.useExternalRefresher = false,
     this.loadingWidget,
     this.emptyConfig,
     this.errorConfig,
@@ -57,6 +62,7 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
             successWidget: (logic) => successWidget(logic as B),
             buildWhen: (prev, current) =>
                 buildWhen?.call(prev as S, current as S) ?? true,
+            useExternalRefresher: useExternalRefresher,
           )
         : _StateObjectContainer<T>(
             logic: logic as BaseObjectLogic<T>,
@@ -66,6 +72,7 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
             successWidget: (logic) => successWidget(logic as B),
             buildWhen: (prev, current) =>
                 buildWhen?.call(prev as S, current as S) ?? true,
+            useExternalRefresher: useExternalRefresher,
           );
   }
 }
@@ -73,6 +80,10 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
 class _StateListContainer<T> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseListLogic<T> logic;
+
+  /// Wether to use SmartRefresher outside the StateContainer or not
+  /// Default [false].
+  final bool useExternalRefresher;
 
   /// Custom widget to replace loading widget
   final Widget? loadingWidget;
@@ -95,6 +106,7 @@ class _StateListContainer<T> extends StatelessWidget {
   const _StateListContainer({
     super.key,
     required this.logic,
+    this.useExternalRefresher = false,
     required this.loadingWidget,
     required this.emptyConfig,
     required this.errorConfig,
@@ -104,36 +116,61 @@ class _StateListContainer<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: logic.refreshController,
-      onRefresh: logic.refreshData,
-      enablePullDown: true,
-      enablePullUp: logic.state.hasMoreData,
-      child: BlocBuilder<BaseListLogic<T>, BaseListState<T>>(
-        bloc: logic,
-        buildWhen: buildWhen ?? (previous, next) => previous != next,
-        builder: (context, state) {
-          if (state.isLoading) {
-            return Center(
-              child: loadingWidget ?? const CircularProgressIndicator(),
-            );
-          } else if (state.isSuccess || state.isLoadMore) {
-            return successWidget(logic);
-          } else if (state.isError) {
-            return StateErrorContainer(
-              config: errorConfig ??
-                  StateWidgetConfig(
-                    title: state.errorTitle,
-                    message: state.errorMessage,
-                  ),
-            );
-          } else if (state.isEmpty) {
-            return StateEmptyContainer(config: emptyConfig);
-          }
+    return BlocBuilder<BaseListLogic<T>, BaseListState<T>>(
+      bloc: logic,
+      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      builder: (context, state) {
+        if (state.isLoading) {
+          return Center(
+            child: loadingWidget ?? const CircularProgressIndicator(),
+          );
+        } else if (state.isSuccess || state.isLoadMore) {
+          final loadedWidget = successWidget(logic);
 
-          return const SizedBox.shrink();
-        },
-      ),
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  onLoading: logic.loadNextData,
+                  enablePullDown: true,
+                  enablePullUp: logic.state.hasMoreData,
+                  child: loadedWidget,
+                );
+        } else if (state.isError) {
+          final loadedWidget = StateErrorContainer(
+            config: errorConfig ??
+                StateWidgetConfig(
+                  title: state.errorTitle,
+                  message: state.errorMessage,
+                ),
+          );
+
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  child: loadedWidget,
+                );
+        } else if (state.isEmpty) {
+          final loadedWidget = StateEmptyContainer(config: emptyConfig);
+
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  child: loadedWidget,
+                );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }
@@ -141,6 +178,10 @@ class _StateListContainer<T> extends StatelessWidget {
 class _StateObjectContainer<T> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseObjectLogic<T> logic;
+
+  /// Wether to use SmartRefresher outside the StateContainer or not
+  /// Default [false].
+  final bool useExternalRefresher;
 
   /// Custom widget to replace loading widget
   final Widget? loadingWidget;
@@ -163,6 +204,7 @@ class _StateObjectContainer<T> extends StatelessWidget {
   const _StateObjectContainer({
     super.key,
     required this.logic,
+    this.useExternalRefresher = false,
     required this.loadingWidget,
     required this.emptyConfig,
     required this.errorConfig,
@@ -172,35 +214,59 @@ class _StateObjectContainer<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SmartRefresher(
-      controller: logic.refreshController,
-      onRefresh: logic.refreshData,
-      enablePullDown: true,
-      child: BlocBuilder<BaseObjectLogic<T>, BaseObjectState<T>>(
-        bloc: logic,
-        buildWhen: buildWhen ?? (previous, next) => previous != next,
-        builder: (context, state) {
-          if (state.isLoading) {
-            return Center(
-              child: loadingWidget ?? const CircularProgressIndicator(),
-            );
-          } else if (state.isSuccess || state.isLoadMore) {
-            return successWidget(logic);
-          } else if (state.isError) {
-            return StateErrorContainer(
-              config: errorConfig ??
-                  StateWidgetConfig(
-                    title: state.errorTitle,
-                    message: state.errorMessage,
-                  ),
-            );
-          } else if (state.isEmpty) {
-            return StateEmptyContainer(config: emptyConfig);
-          }
+    return BlocBuilder<BaseObjectLogic<T>, BaseObjectState<T>>(
+      bloc: logic,
+      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      builder: (context, state) {
+        if (state.isLoading) {
+          return Center(
+            child: loadingWidget ?? const CircularProgressIndicator(),
+          );
+        } else if (state.isSuccess || state.isLoadMore) {
+          final loadedWidget = successWidget(logic);
 
-          return const SizedBox.shrink();
-        },
-      ),
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  enablePullDown: true,
+                  child: loadedWidget,
+                );
+        } else if (state.isError) {
+          final loadedWidget = StateErrorContainer(
+            config: errorConfig ??
+                StateWidgetConfig(
+                  title: state.errorTitle,
+                  message: state.errorMessage,
+                ),
+          );
+
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  child: loadedWidget,
+                );
+        } else if (state.isEmpty) {
+          final loadedWidget = StateEmptyContainer(config: emptyConfig);
+
+          return useExternalRefresher
+              ? loadedWidget
+              : SmartRefresher(
+                  controller: logic.refreshController,
+                  onRefresh: logic.refreshData,
+                  enablePullDown: true,
+                  enablePullUp: false,
+                  child: loadedWidget,
+                );
+        }
+
+        return const SizedBox.shrink();
+      },
     );
   }
 }

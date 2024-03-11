@@ -25,27 +25,30 @@ class StateEmptyContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: config?.widget ??
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              config?.image != null
-                  ? Image(image: config!.image!)
-                  : const Icon(Icons.analytics_outlined, size: 48),
-              const SizedBox(height: 16),
-              Text(
-                config?.title ?? "Data not found",
-                style: config?.titleStyle ??
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                config?.message ?? "Cannot display data from data source",
-                style: config?.messageStyle ?? const TextStyle(fontSize: 14),
-              ),
-            ],
-          ),
+      child: SingleChildScrollView(
+        child: config?.widget ??
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                config?.image != null
+                    ? Image(image: config!.image!)
+                    : const Icon(Icons.analytics_outlined, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  config?.title ?? "Data not found",
+                  style: config?.titleStyle ??
+                      const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  config?.message ?? "Cannot display data from data source",
+                  style: config?.messageStyle ?? const TextStyle(fontSize: 14),
+                ),
+              ],
+            ),
+      ),
     );
   }
 }
