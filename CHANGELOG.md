@@ -1,3 +1,9 @@
-## 0.0.1
+## v.1.0.0
 
-* TODO: Describe initial release.
+### Initial Release
+- Bult-in state-handling widget
+- Form state-handling support
+- Pull to Refresh support
+- Pagination support
+- State changes logging
+- Cubit wrapper
