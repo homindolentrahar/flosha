@@ -7,10 +7,9 @@ import 'package:flosha/widget/state/state_empty_container.dart';
 import 'package:flosha/widget/state/state_error_container.dart';
 import 'package:flutter/material.dart';
 
-class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
-    extends StatelessWidget {
+class StateContainer<S extends BaseState, T> extends StatelessWidget {
   /// Logic class that handle state to display data\
-  final B logic;
+  final BlocBase logic;
 
   /// Wether to use SmartRefresher outside the StateContainer or not
   /// Default [false].
@@ -25,9 +24,8 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
   /// Config for error widget that will shown when state is `error`
   final StateWidgetConfig? errorConfig;
 
-  /// Callback function to display desired widget when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(B logic) successWidget;
+  /// Widget that will be displayed when state is `success`\
+  final Widget successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -58,7 +56,7 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: (logic) => successWidget(logic as B),
+            successWidget: successWidget,
             buildWhen: (prev, current) =>
                 buildWhen?.call(prev as S, current as S) ?? true,
             useExternalRefresher: useExternalRefresher,
@@ -68,7 +66,7 @@ class StateContainer<B extends BlocBase<S>, S extends BaseState, T>
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: (logic) => successWidget(logic as B),
+            successWidget: successWidget,
             buildWhen: (prev, current) =>
                 buildWhen?.call(prev as S, current as S) ?? true,
             useExternalRefresher: useExternalRefresher,
@@ -94,8 +92,7 @@ class _StateListContainer<T> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Callback function to display desired widget when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(BaseListLogic<T> logic) successWidget;
+  final Widget successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -124,17 +121,15 @@ class _StateListContainer<T> extends StatelessWidget {
             child: loadingWidget ?? const CircularProgressIndicator(),
           );
         } else if (state.isSuccess || state.isLoadMore) {
-          final loadedWidget = successWidget(logic);
-
           return useExternalRefresher
-              ? loadedWidget
+              ? successWidget
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   onLoading: logic.loadNextData,
                   enablePullDown: true,
                   enablePullUp: logic.state.hasMoreData,
-                  child: loadedWidget,
+                  child: successWidget,
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(
@@ -191,9 +186,8 @@ class _StateObjectContainer<T> extends StatelessWidget {
   /// Config for error widget that will shown when state is `error`
   final StateWidgetConfig? errorConfig;
 
-  /// Callback function to display desired widget when state is `success`\
-  /// Receive [data] as parameter with type [T] from [state.data]
-  final Widget Function(BaseObjectLogic<T> logic) successWidget;
+  /// Widget that will displayed when state is `success`\
+  final Widget successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -222,15 +216,13 @@ class _StateObjectContainer<T> extends StatelessWidget {
             child: loadingWidget ?? const CircularProgressIndicator(),
           );
         } else if (state.isSuccess || state.isLoadMore) {
-          final loadedWidget = successWidget(logic);
-
           return useExternalRefresher
-              ? loadedWidget
+              ? successWidget
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   enablePullDown: true,
-                  child: loadedWidget,
+                  child: successWidget,
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(
