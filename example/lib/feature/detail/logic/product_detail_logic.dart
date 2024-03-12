@@ -8,6 +8,13 @@ class ProductDetailLogic extends BaseObjectLogic<Product> {
 
   ProductDetailLogic(this.id) : super(const BaseObjectState());
 
+  double get discountedPrice {
+    final double discountedPrice = (data?.price ?? 0) -
+        ((data?.price ?? 0) * ((data?.discountPercentage ?? 0) / 100));
+
+    return discountedPrice;
+  }
+
   @override
   void onInit() {
     super.onInit();
