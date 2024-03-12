@@ -1,6 +1,7 @@
 import 'package:example/feature/create/create_product_page.dart';
 import 'package:example/feature/detail/product_detail_page.dart';
 import 'package:example/feature/products/products_page.dart';
+import 'package:flosha/flosha.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
@@ -13,6 +14,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Bloc.observer = BaseStateObserver();
+
     return MaterialApp(
       title: 'Flutter Demo',
       initialRoute: "/",

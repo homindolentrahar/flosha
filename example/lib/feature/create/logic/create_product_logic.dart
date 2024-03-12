@@ -21,7 +21,7 @@ class CreateProductLogic extends BaseFormLogic<Product> {
 
           log("Result: ${result.toJson()}");
 
-          error(errorTitle: "Error euy", errorMessage: "Error");
+          success(data: result);
         });
       } catch (e) {
         log("Error: ${e.toString()}");

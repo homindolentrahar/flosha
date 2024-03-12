@@ -28,35 +28,30 @@ class ProductsPage extends StatelessWidget {
               },
             ),
             body: SafeArea(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                child: StateContainer<ProductsLogic, BaseListState<Product>,
-                    List<Product>>(
-                  logic: logic,
-                  onSuccess: (data) {
-                    return SmartRefresher(
-                      controller: logic.refreshController,
-                      onRefresh: logic.refreshData,
-                      onLoading: logic.loadNextData,
-                      enablePullDown: true,
-                      enablePullUp: logic.state.hasMoreData,
-                      child: ListView.separated(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: data?.length ?? 0,
-                        separatorBuilder: (ctx, index) =>
-                            const SizedBox(height: 8),
-                        itemBuilder: (ctx, index) => ProductListItem(
-                          data: data?[index],
-                          onPressed: (value) {
-                            Navigator.of(context).pushNamed(
-                              ProductDetailPage.route,
-                              arguments: data?[index].id,
-                            );
-                          },
-                        ),
+              child: StateContainer<BaseListState<Product>, Product>(
+                logic: logic,
+                successWidget: ScrollableListWidget(
+                  prefixWidgets: const [
+                    Text(
+                      "Products",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  },
+                    ),
+                  ],
+                  datas: logic.data,
+                  padding: const EdgeInsets.all(16),
+                  separator: (index) => const SizedBox(height: 16),
+                  listItem: (index) => ProductListItem(
+                    data: logic.data[index],
+                    onPressed: (value) {
+                      Navigator.of(context).pushNamed(
+                        ProductDetailPage.route,
+                        arguments: logic.data[index].id,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
