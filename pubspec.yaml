@@ -1,7 +1,7 @@
 name: flosha
 description: "Boilerplate for handling state with BLoC pattern in a smooth way"
 version: 1.0.0
-homepage:
+homepage: https://github.com/homindolentrahar/flosha
 
 environment:
   sdk: ">=3.2.3 <4.0.0"
