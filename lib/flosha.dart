@@ -12,6 +12,7 @@ export './base/logic/base_form_logic.dart';
 export './base/logic/base_object_logic.dart';
 export './base/logic/base_list_logic.dart';
 export './base/base_state_observer.dart';
+export './base/model/model_serialize.dart';
 export './widget/core/state_form.dart';
 export './widget/core/state_container.dart';
 export './widget/core/state_listener.dart';

@@ -1,11 +1,13 @@
 import 'package:flosha/base/base_status.dart';
 import 'package:flosha/base/logic/base_logic_mixin.dart';
+import 'package:flosha/base/model/model_serialize.dart';
 import 'package:flosha/base/state/base_object_state.dart';
+import 'package:flosha/util/helper/cache_helper.dart';
 import 'package:flosha/util/helper/logger_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
-    with BaseLogicMixin {
+abstract class BaseObjectLogic<T extends ModelSerialize>
+    extends Cubit<BaseObjectState<T>> with BaseLogicMixin {
   /// Base logic or controller class that handle your state
   /// Handle state that wrap data with type of Object or [T]
   /// Write your business logic here and emit the necessary state to update UI with corresponding data
@@ -13,11 +15,29 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
     onInit();
   }
 
+  /// Cache helper to help with getting/saving cache into local storage
+  final CacheHelper _cacheHelper = CacheHelper.create();
+
   /// Getter for getting data from emitted state
   T? get data => state.data;
 
+  /// Getter for getting data form cache
+  Map<String, dynamic> get cache => _cacheHelper.getCache(cacheKey);
+
+  /// Wether to load initial data from cache (if have any)
+  /// Default [true]
+  bool get loadFromCache => true;
+
+  String get cacheKey => T.runtimeType.toString();
+
+  T get serializeFromJson;
+
   /// Overridable function that will be executed when logic class initialized for the first time
-  void onInit() {}
+  void onInit() {
+    if (loadFromCache) {
+      success(serializeFromJson);
+    }
+  }
 
   /// Overridable function to load data from remote or local data source
   Future<void> loadData();
@@ -33,7 +53,14 @@ abstract class BaseObjectLogic<T> extends Cubit<BaseObjectState<T>>
 
   /// Invoke a **Success** state
   /// Pass down the [data] with corresponding type [T]
-  void success(T? data) {
+  void success(T? data, {bool saveCache = true}) {
+    if (saveCache) {
+      _cacheHelper.saveCache(
+        key: cacheKey,
+        data: data?.toJson(),
+      );
+    }
+
     emit(state.copyWith(status: BaseStatus.success, data: data));
 
     _finishRefresh();

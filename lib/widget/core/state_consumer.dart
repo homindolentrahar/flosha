@@ -8,8 +8,8 @@ import 'package:flosha/widget/state/state_empty_container.dart';
 import 'package:flosha/widget/state/state_error_container.dart';
 import 'package:flutter/material.dart';
 
-class StateConsumer<B extends Cubit<S>, S extends BaseState<T>, T>
-    extends StatelessWidget {
+class StateConsumer<B extends Cubit<S>, S extends BaseState<T>,
+    T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   /// Pass [B] type in the first generic type to define Logic class type
   final B logic;
@@ -184,7 +184,7 @@ class _StateListContainer<T> extends StatelessWidget {
   }
 }
 
-class _StateObjectContainer<T> extends StatelessWidget {
+class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseObjectLogic<T> logic;
 

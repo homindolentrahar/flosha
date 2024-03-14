@@ -7,7 +7,8 @@ import 'package:flosha/widget/state/state_empty_container.dart';
 import 'package:flosha/widget/state/state_error_container.dart';
 import 'package:flutter/material.dart';
 
-class StateContainer<S extends BaseState, T> extends StatelessWidget {
+class StateContainer<S extends BaseState, T extends ModelSerialize>
+    extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BlocBase logic;
 
@@ -57,8 +58,7 @@ class StateContainer<S extends BaseState, T> extends StatelessWidget {
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
             successWidget: successWidget,
-            buildWhen: (prev, current) =>
-                buildWhen?.call(prev as S, current as S) ?? true,
+            buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           )
         : _StateObjectContainer<T>(
@@ -67,8 +67,7 @@ class StateContainer<S extends BaseState, T> extends StatelessWidget {
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
             successWidget: successWidget,
-            buildWhen: (prev, current) =>
-                buildWhen?.call(prev as S, current as S) ?? true,
+            buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           );
   }
@@ -114,7 +113,7 @@ class _StateListContainer<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BaseListLogic<T>, BaseListState<T>>(
       bloc: logic,
-      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      // buildWhen: buildWhen ?? (previous, next) => previous != next,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
@@ -169,7 +168,7 @@ class _StateListContainer<T> extends StatelessWidget {
   }
 }
 
-class _StateObjectContainer<T> extends StatelessWidget {
+class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseObjectLogic<T> logic;
 
@@ -209,7 +208,7 @@ class _StateObjectContainer<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BaseObjectLogic<T>, BaseObjectState<T>>(
       bloc: logic,
-      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      // buildWhen: buildWhen ?? (previous, next) => previous != next,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
