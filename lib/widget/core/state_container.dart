@@ -186,7 +186,7 @@ class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Widget that will displayed when state is `success`\
-  final Widget Function(BaseObjectState<T>) successWidget;
+  final Widget Function(BaseObjectState<T> state) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\

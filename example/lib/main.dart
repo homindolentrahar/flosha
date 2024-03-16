@@ -2,10 +2,15 @@ import 'package:example/feature/create/create_product_page.dart';
 import 'package:example/feature/detail/product_detail_page.dart';
 import 'package:example/feature/products/products_page.dart';
 import 'package:flosha/flosha.dart';
+import 'package:flosha/util/helper/cache_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await CacheHelper.initialize();
+
   runApp(const MyApp());
 }
 

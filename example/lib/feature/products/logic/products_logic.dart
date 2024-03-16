@@ -7,11 +7,11 @@ class ProductsLogic extends BaseListLogic<Product> {
   ProductsLogic() : super(const BaseListState());
 
   @override
-  void onInit() {
-    super.onInit();
+  List<Product> get deserializeFromJson =>
+      cache.map((e) => Product.fromJson(e)).toList();
 
-    loadData();
-  }
+  @override
+  bool get loadFromCache => true;
 
   @override
   void loadNextData() {
@@ -20,13 +20,13 @@ class ProductsLogic extends BaseListLogic<Product> {
 
   @override
   void refreshData() {
-    loadData();
+    loadData(initialLoad: true);
   }
 
   @override
-  Future<void> loadData({int page = 1}) async {
+  Future<void> loadData({int page = 1, bool initialLoad = false}) async {
     try {
-      loading();
+      loading(initialLoad: initialLoad);
 
       final result = await DummyApiClient.instance().getAllProducsts(
         page: page,

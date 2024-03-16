@@ -16,11 +16,11 @@ class ProductDetailLogic extends BaseObjectLogic<Product> {
   }
 
   @override
-  void onInit() {
-    super.onInit();
+  Product? get deserializeFromJson =>
+      cache == null ? null : Product.fromJson(cache ?? {});
 
-    loadData();
-  }
+  @override
+  bool get loadFromCache => true;
 
   @override
   void refreshData() {

@@ -17,8 +17,6 @@ class ProductDetailPage extends StatelessWidget {
       create: (_) => ProductDetailLogic(id),
       child: Builder(
         builder: (builderCtx) {
-          final logic = builderCtx.read<ProductDetailLogic>();
-
           return Scaffold(
             appBar: AppBar(
               title: const Text(
@@ -31,11 +29,11 @@ class ProductDetailPage extends StatelessWidget {
             ),
             body: SafeArea(
               child: StateContainer<BaseObjectState<Product>, Product>(
-                logic: logic,
-                successWidget: Column(
+                logic: builderCtx.watch<ProductDetailLogic>(),
+                successWidget: (state) => Column(
                   children: [
                     Image.network(
-                      logic.data?.thumbnail ?? "-",
+                      state.data?.thumbnail ?? "-",
                       fit: BoxFit.cover,
                       width: MediaQuery.of(context).size.width,
                       height: 280,
@@ -46,7 +44,7 @@ class ProductDetailPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            logic.data?.title ?? "-",
+                            state.data?.title ?? "-",
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -58,7 +56,7 @@ class ProductDetailPage extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                logic.data?.brand ?? "-",
+                                state.data?.brand ?? "-",
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade500,
@@ -66,7 +64,7 @@ class ProductDetailPage extends StatelessWidget {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                logic.data?.category ?? "-",
+                                state.data?.category ?? "-",
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey.shade500,
@@ -96,7 +94,7 @@ class ProductDetailPage extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      logic.data?.rating?.toString() ?? "-",
+                                      state.data?.rating?.toString() ?? "-",
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
@@ -123,7 +121,7 @@ class ProductDetailPage extends StatelessWidget {
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      "${logic.data?.stock} pcs",
+                                      "${state.data?.stock} pcs",
                                       style: const TextStyle(
                                         fontSize: 12,
                                         fontWeight: FontWeight.w600,
@@ -136,7 +134,7 @@ class ProductDetailPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            "\$${logic.discountedPrice.toStringAsFixed(2)}",
+                            "\$${builderCtx.read<ProductDetailLogic>().discountedPrice.toStringAsFixed(2)}",
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -155,7 +153,7 @@ class ProductDetailPage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
-                                  "${logic.data?.discountPercentage}%",
+                                  "${state.data?.discountPercentage}%",
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
@@ -165,7 +163,7 @@ class ProductDetailPage extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                "\$${logic.data?.price ?? "-"}",
+                                "\$${state.data?.price ?? "-"}",
                                 style: TextStyle(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors.grey.shade800,
@@ -175,7 +173,7 @@ class ProductDetailPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 16),
                           Text(
-                            logic.data?.description ?? "-",
+                            state.data?.description ?? "-",
                             style: TextStyle(
                               color: Colors.grey.shade600,
                             ),

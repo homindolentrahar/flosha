@@ -1,3 +1,5 @@
+import 'package:flosha/flosha.dart';
+
 class ProductsResponse {
   final List<Product>? products;
   final int? total;
@@ -32,7 +34,7 @@ class ProductsResponse {
       };
 }
 
-class Product {
+class Product implements ModelSerialize {
   final int? id;
   final String? title;
   final String? description;
@@ -59,6 +61,22 @@ class Product {
     this.images,
   });
 
+  @override
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "title": title,
+        "description": description,
+        "price": price,
+        "discountPercentage": discountPercentage,
+        "rating": rating,
+        "stock": stock,
+        "brand": brand,
+        "category": category,
+        "thumbnail": thumbnail,
+        "images":
+            images == null ? [] : List<dynamic>.from(images!.map((x) => x)),
+      };
+
   factory Product.fromJson(Map<String, dynamic> json) => Product(
         id: json["id"],
         title: json["title"],
@@ -74,19 +92,4 @@ class Product {
             ? []
             : List<String>.from(json["images"]!.map((x) => x)),
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "title": title,
-        "description": description,
-        "price": price,
-        "discountPercentage": discountPercentage,
-        "rating": rating,
-        "stock": stock,
-        "brand": brand,
-        "category": category,
-        "thumbnail": thumbnail,
-        "images":
-            images == null ? [] : List<dynamic>.from(images!.map((x) => x)),
-      };
 }

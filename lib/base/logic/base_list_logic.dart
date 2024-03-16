@@ -72,6 +72,7 @@ abstract class BaseListLogic<T extends ModelSerialize>
   void refreshData();
 
   /// Invoke a **Loading** state
+  /// [initialLoad] to indicate wether to show loading widget on first load of the list
   void loading({bool initialLoad = false}) {
     emit(
       state.copyWith(
