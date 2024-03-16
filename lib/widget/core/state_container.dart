@@ -7,7 +7,8 @@ import 'package:flosha/widget/state/state_empty_container.dart';
 import 'package:flosha/widget/state/state_error_container.dart';
 import 'package:flutter/material.dart';
 
-class StateContainer<S extends BaseState, T> extends StatelessWidget {
+class StateContainer<S extends BaseState, T extends ModelSerialize>
+    extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BlocBase logic;
 
@@ -25,7 +26,7 @@ class StateContainer<S extends BaseState, T> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Widget that will be displayed when state is `success`\
-  final Widget successWidget;
+  final Widget Function(S) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -56,9 +57,8 @@ class StateContainer<S extends BaseState, T> extends StatelessWidget {
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: successWidget,
-            buildWhen: (prev, current) =>
-                buildWhen?.call(prev as S, current as S) ?? true,
+            successWidget: (state) => successWidget(state as S),
+            buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           )
         : _StateObjectContainer<T>(
@@ -66,15 +66,14 @@ class StateContainer<S extends BaseState, T> extends StatelessWidget {
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: successWidget,
-            buildWhen: (prev, current) =>
-                buildWhen?.call(prev as S, current as S) ?? true,
+            successWidget: (state) => successWidget(state as S),
+            buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           );
   }
 }
 
-class _StateListContainer<T> extends StatelessWidget {
+class _StateListContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseListLogic<T> logic;
 
@@ -92,7 +91,7 @@ class _StateListContainer<T> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Callback function to display desired widget when state is `success`\
-  final Widget successWidget;
+  final Widget Function(BaseListState<T> st) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -114,7 +113,7 @@ class _StateListContainer<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BaseListLogic<T>, BaseListState<T>>(
       bloc: logic,
-      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      // buildWhen: buildWhen ?? (previous, next) => previous != next,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
@@ -122,14 +121,14 @@ class _StateListContainer<T> extends StatelessWidget {
           );
         } else if (state.isSuccess || state.isLoadMore) {
           return useExternalRefresher
-              ? successWidget
+              ? successWidget(state)
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   onLoading: logic.loadNextData,
                   enablePullDown: true,
                   enablePullUp: logic.state.hasMoreData,
-                  child: successWidget,
+                  child: successWidget(state),
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(
@@ -169,7 +168,7 @@ class _StateListContainer<T> extends StatelessWidget {
   }
 }
 
-class _StateObjectContainer<T> extends StatelessWidget {
+class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseObjectLogic<T> logic;
 
@@ -187,7 +186,7 @@ class _StateObjectContainer<T> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Widget that will displayed when state is `success`\
-  final Widget successWidget;
+  final Widget Function(BaseObjectState<T> state) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -209,7 +208,7 @@ class _StateObjectContainer<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<BaseObjectLogic<T>, BaseObjectState<T>>(
       bloc: logic,
-      buildWhen: buildWhen ?? (previous, next) => previous != next,
+      // buildWhen: buildWhen ?? (previous, next) => previous != next,
       builder: (context, state) {
         if (state.isLoading) {
           return Center(
@@ -217,12 +216,12 @@ class _StateObjectContainer<T> extends StatelessWidget {
           );
         } else if (state.isSuccess || state.isLoadMore) {
           return useExternalRefresher
-              ? successWidget
+              ? successWidget(state)
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   enablePullDown: true,
-                  child: successWidget,
+                  child: successWidget(state),
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(

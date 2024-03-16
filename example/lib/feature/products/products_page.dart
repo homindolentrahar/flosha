@@ -18,8 +18,6 @@ class ProductsPage extends StatelessWidget {
       create: (_) => ProductsLogic(),
       child: Builder(
         builder: (builderCtx) {
-          final logic = builderCtx.read<ProductsLogic>();
-
           return Scaffold(
             floatingActionButton: FloatingActionButton(
               child: const Icon(Icons.add),
@@ -29,8 +27,8 @@ class ProductsPage extends StatelessWidget {
             ),
             body: SafeArea(
               child: StateContainer<BaseListState<Product>, Product>(
-                logic: logic,
-                successWidget: ScrollableListWidget(
+                logic: builderCtx.watch<ProductsLogic>(),
+                successWidget: (state) => ScrollableListWidget(
                   prefixWidgets: const [
                     Text(
                       "Products",
@@ -40,15 +38,15 @@ class ProductsPage extends StatelessWidget {
                       ),
                     ),
                   ],
-                  datas: logic.data,
+                  datas: state.list ?? [],
                   padding: const EdgeInsets.all(16),
                   separator: (index) => const SizedBox(height: 16),
                   listItem: (index) => ProductListItem(
-                    data: logic.data[index],
+                    data: state.list?[index],
                     onPressed: (value) {
                       Navigator.of(context).pushNamed(
                         ProductDetailPage.route,
-                        arguments: logic.data[index].id,
+                        arguments: state.list?[index].id,
                       );
                     },
                   ),

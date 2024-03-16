@@ -3,8 +3,8 @@ import 'package:flosha/base/state/base_state.dart';
 import 'package:flosha/flosha.dart';
 import 'package:flutter/material.dart';
 
-class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
-    extends StatelessWidget {
+class StateLiestener<B extends Cubit<S>, S extends BaseState<T>,
+    T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   /// Pass [B] type in the first generic type to define Logic class type
   final B logic;
@@ -63,7 +63,7 @@ class StateLiestener<B extends Cubit<S>, S extends BaseState<T>, T>
         } else if (state.isSuccess) {
           onListen.call(
             right(
-              B is BaseListLogic<S>? ? state.list as T : state.data as T,
+              B is BaseListLogic<T>? ? state.list as T : state.data as T,
             ),
           );
         } else if (state.isError) {

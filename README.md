@@ -12,7 +12,7 @@ Boilerplate for handling state with BLoC/Cubit pattern in a smooth way
 - [x] State changes logging
 - [x] Cubit wrapper
 - [ ] Bloc wrapper
-- [ ] Local cache support
+- [x] Local cache support
 
 ## Get Started
 
@@ -21,7 +21,7 @@ To install `flosha`, add these following codes into your `pubspec.yaml` file:
 ```yaml
 dependencies:
   ...
-  flosha: ^1.0.0
+  flosha: ^1.1.0
 ```
 
 ## The Logics
@@ -48,11 +48,11 @@ class ProductDetailLogic extends BaseObjectLogic<Product> {
   ProductDetailLogic(this.id) : super(const BaseObjectState());
 
   @override
-  void onInit() {
-    super.onInit();
+  Product? get deserializeFromJson =>
+      cache == null ? null : Product.fromJson(cache ?? {});
 
-    loadData();
-  }
+  @override
+  bool get loadFromCache => true;
 
   @override
   void refreshData() {
@@ -72,7 +72,6 @@ class ProductDetailLogic extends BaseObjectLogic<Product> {
     }
   }
 }
-
 ```
 
 ### BaseListLogic
@@ -95,11 +94,11 @@ class ProductsLogic extends BaseListLogic<Product> {
   ProductsLogic() : super(const BaseListState());
 
   @override
-  void onInit() {
-    super.onInit();
+  List<Product> get deserializeFromJson =>
+      cache.map((e) => Product.fromJson(e)).toList();
 
-    loadData();
-  }
+  @override
+  bool get loadFromCache => true;
 
   @override
   void loadNextData() {
@@ -108,13 +107,13 @@ class ProductsLogic extends BaseListLogic<Product> {
 
   @override
   void refreshData() {
-    loadData();
+    loadData(initialLoad: true);
   }
 
   @override
-  Future<void> loadData({int page = 1}) async {
+  Future<void> loadData({int page = 1, bool initialLoad = false}) async {
     try {
-      loading();
+      loading(initialLoad: initialLoad);
 
       final result = await DummyApiClient.instance().getAllProducsts(
         page: page,
@@ -192,7 +191,7 @@ return BlocProvider(
                 body: SafeArea(
                     child: StateContainer<BaseListState<Product>, Product>(
                         logic: logic,
-                        successWidget: SuccessWidget(),
+                        successWidget: (state) => SuccessWidget(),
                     ),
                 ),
             );
@@ -210,7 +209,7 @@ return BlocProvider(
 StateContainer<BaseListState<Product>, Product>(
     // Logic class that manage state and business logic
     logic: logic,
-    successWidget: SuccessWidget(),
+    successWidget: (state) => SuccessWidget(),
 )
 ```
 
@@ -221,7 +220,7 @@ or
 StateContainer<BaseObjectState<Product>, Product>(
     // Logic class that manage state and business logic
     logic: logic,
-    successWidget: SuccessWidget(),
+    successWidget: (state) => SuccessWidget(),
 )
 ```
 
@@ -234,7 +233,7 @@ StateLiestener<ProductsLogic, BaseListState<Product>, Product>(
     // Logic class that manage state and business logic
     logic: logic,
     child: child,
-    onListen: (result){},
+    onListen: (result) {},
 )
 ```
 
@@ -248,7 +247,7 @@ StateConsumer<ProductsLogic, BaseListState<Product>, Product>(
     onListen: (result) {
         // Execute code when the state changes
     }
-    successWidget: SuccessWidget(),
+    successWidget: (state) => SuccessWidget(),
 )
 ```
 
@@ -281,29 +280,29 @@ StateForm(
 
 ```dart
 StateContainer<BaseListState<Product>, Product>(
-    logic: logic,
-    successWidget: ScrollableListWidget(
+  logic: builderCtx.watch<ProductsLogic>(),
+  successWidget: (state) => ScrollableListWidget(
     prefixWidgets: const [
-        Text(
-            "Products",
-            style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-            ),
+      Text(
+        "Products",
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
+      ),
     ],
-    datas: logic.data,
+    datas: state.list ?? [],
     padding: const EdgeInsets.all(16),
     separator: (index) => const SizedBox(height: 16),
     listItem: (index) => ProductListItem(
-        data: logic.data[index],
-        onPressed: (value) {
-            Navigator.of(context).pushNamed(
-                ProductDetailPage.route,
-                arguments: logic.data[index].id,
-                );
-            },
-        ),
+      data: state.list?[index],
+      onPressed: (value) {
+        Navigator.of(context).pushNamed(
+          ProductDetailPage.route,
+          arguments: state.list?[index].id,
+        );
+      },
     ),
+  ),
 )
 ```

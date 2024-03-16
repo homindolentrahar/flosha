@@ -3,19 +3,21 @@ import 'package:logger/logger.dart';
 class LoggerHelper {
   late Logger _logger;
 
-  LoggerHelper._() {
+  LoggerHelper._({bool longLog = false}) {
     _logger = Logger(
       printer: PrettyPrinter(
         noBoxingByDefault: true,
-        lineLength: 250,
         stackTraceBeginIndex: 0,
         methodCount: 0,
         errorMethodCount: 0,
+        printEmojis: true,
+        printTime: true,
       ),
     );
   }
 
-  factory LoggerHelper.create() => LoggerHelper._();
+  factory LoggerHelper.create({bool longLog = false}) =>
+      LoggerHelper._(longLog: longLog);
 
   void info(String message, {Object? error, StackTrace? trace}) =>
       _logger.i(message, error: error, stackTrace: trace);

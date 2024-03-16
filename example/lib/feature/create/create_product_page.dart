@@ -19,7 +19,13 @@ class CreateProductPage extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text("Create  Product"),
+            title: const Text(
+              "Create  Product",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
           body: SafeArea(
             child: Padding(
@@ -53,6 +59,7 @@ class CreateProductPage extends StatelessWidget {
                       name: 'title',
                       decoration: const InputDecoration(hintText: "Title"),
                       validator: FormBuilderValidators.required(),
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     FormBuilderTextField(
@@ -62,6 +69,7 @@ class CreateProductPage extends StatelessWidget {
                       maxLines: 3,
                       minLines: 3,
                       validator: FormBuilderValidators.required(),
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     FormBuilderTextField(
@@ -70,6 +78,7 @@ class CreateProductPage extends StatelessWidget {
                       decoration: const InputDecoration(hintText: "Price"),
                       validator: FormBuilderValidators.required(),
                       valueTransformer: (value) => int.tryParse(value ?? "0"),
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     FormBuilderTextField(
@@ -78,18 +87,21 @@ class CreateProductPage extends StatelessWidget {
                       decoration: const InputDecoration(hintText: "Stock"),
                       validator: FormBuilderValidators.required(),
                       valueTransformer: (value) => int.tryParse(value ?? "0"),
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     FormBuilderTextField(
                       name: 'brand',
                       decoration: const InputDecoration(hintText: "Brand"),
                       validator: FormBuilderValidators.required(),
+                      textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     FormBuilderTextField(
                       name: 'category',
                       decoration: const InputDecoration(hintText: "Category"),
                       validator: FormBuilderValidators.required(),
+                      textInputAction: TextInputAction.done,
                     ),
                   ],
                 ),
