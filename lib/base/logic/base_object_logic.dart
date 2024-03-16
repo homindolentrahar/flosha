@@ -4,6 +4,7 @@ import 'package:flosha/base/model/model_serialize.dart';
 import 'package:flosha/base/state/base_object_state.dart';
 import 'package:flosha/util/helper/cache_helper.dart';
 import 'package:flosha/util/helper/logger_helper.dart';
+import 'package:flosha/util/helper/map_helper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class BaseObjectLogic<T extends ModelSerialize>
@@ -22,21 +23,36 @@ abstract class BaseObjectLogic<T extends ModelSerialize>
   T? get data => state.data;
 
   /// Getter for getting data form cache
-  Map<String, dynamic> get cache => _cacheHelper.getCache(cacheKey);
+  Map<String, dynamic>? get cache => _cacheHelper.getCache(cacheKey) == null
+      ? null
+      : MapHelper.fromDynamic(_cacheHelper.getCache(cacheKey));
 
   /// Wether to load initial data from cache (if have any)
   /// Default [true]
   bool get loadFromCache => true;
 
+  /// Wether to display data from cache (if have any) instead of error container
+  /// Default [false]
+  bool get replaceErrorWithCache => false;
+
+  /// Custom key to save data into cache
+  /// Override this tto change from default key
   String get cacheKey => T.runtimeType.toString();
 
-  T get serializeFromJson;
+  /// Getter for getting
+  T? get deserializeFromJson;
 
   /// Overridable function that will be executed when logic class initialized for the first time
   void onInit() {
     if (loadFromCache) {
-      success(serializeFromJson);
+      if (deserializeFromJson == null) {
+        return;
+      }
+
+      success(deserializeFromJson);
     }
+
+    loadData();
   }
 
   /// Overridable function to load data from remote or local data source
@@ -69,13 +85,17 @@ abstract class BaseObjectLogic<T extends ModelSerialize>
   /// Invoke a **Error** state
   /// Pass down the [errorTitle] and [errorMessage]
   void error({String? errorTitle, String? errorMessage}) {
-    emit(
-      state.copyWith(
-        status: BaseStatus.error,
-        errorTitle: errorTitle,
-        errorMessage: errorMessage,
-      ),
-    );
+    if (replaceErrorWithCache && cache != null) {
+      success(deserializeFromJson);
+    } else {
+      emit(
+        state.copyWith(
+          status: BaseStatus.error,
+          errorTitle: errorTitle,
+          errorMessage: errorMessage,
+        ),
+      );
+    }
 
     LoggerHelper.create().error("$errorTitle: $errorMessage");
 

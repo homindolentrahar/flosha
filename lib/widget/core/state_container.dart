@@ -26,7 +26,7 @@ class StateContainer<S extends BaseState, T extends ModelSerialize>
   final StateWidgetConfig? errorConfig;
 
   /// Widget that will be displayed when state is `success`\
-  final Widget successWidget;
+  final Widget Function(S) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -57,7 +57,7 @@ class StateContainer<S extends BaseState, T extends ModelSerialize>
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: successWidget,
+            successWidget: (state) => successWidget(state as S),
             buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           )
@@ -66,14 +66,14 @@ class StateContainer<S extends BaseState, T extends ModelSerialize>
             loadingWidget: loadingWidget,
             emptyConfig: emptyConfig,
             errorConfig: errorConfig,
-            successWidget: successWidget,
+            successWidget: (state) => successWidget(state as S),
             buildWhen: (prev, current) => true,
             useExternalRefresher: useExternalRefresher,
           );
   }
 }
 
-class _StateListContainer<T> extends StatelessWidget {
+class _StateListContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseListLogic<T> logic;
 
@@ -91,7 +91,7 @@ class _StateListContainer<T> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Callback function to display desired widget when state is `success`\
-  final Widget successWidget;
+  final Widget Function(BaseListState<T> st) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -121,14 +121,14 @@ class _StateListContainer<T> extends StatelessWidget {
           );
         } else if (state.isSuccess || state.isLoadMore) {
           return useExternalRefresher
-              ? successWidget
+              ? successWidget(state)
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   onLoading: logic.loadNextData,
                   enablePullDown: true,
                   enablePullUp: logic.state.hasMoreData,
-                  child: successWidget,
+                  child: successWidget(state),
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(
@@ -186,7 +186,7 @@ class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
   final StateWidgetConfig? errorConfig;
 
   /// Widget that will displayed when state is `success`\
-  final Widget successWidget;
+  final Widget Function(BaseObjectState<T>) successWidget;
 
   /// Function to determine wether to rebuild the container based on certain condition\
   /// Return [bool] value, container will rebuild when value is `true`\
@@ -216,12 +216,12 @@ class _StateObjectContainer<T extends ModelSerialize> extends StatelessWidget {
           );
         } else if (state.isSuccess || state.isLoadMore) {
           return useExternalRefresher
-              ? successWidget
+              ? successWidget(state)
               : SmartRefresher(
                   controller: logic.refreshController,
                   onRefresh: logic.refreshData,
                   enablePullDown: true,
-                  child: successWidget,
+                  child: successWidget(state),
                 );
         } else if (state.isError) {
           final loadedWidget = StateErrorContainer(

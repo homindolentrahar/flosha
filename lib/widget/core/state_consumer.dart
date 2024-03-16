@@ -77,7 +77,7 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>,
         } else if (state.isSuccess) {
           onListen.call(
             right(
-              B is BaseListLogic<S>? ? state.list as T : state.data as T,
+              B is BaseListLogic<T>? ? state.list as T : state.data as T,
             ),
           );
         } else if (state.isError) {
@@ -116,7 +116,7 @@ class StateConsumer<B extends Cubit<S>, S extends BaseState<T>,
   }
 }
 
-class _StateListContainer<T> extends StatelessWidget {
+class _StateListContainer<T extends ModelSerialize> extends StatelessWidget {
   /// Logic class that handle state to display data\
   final BaseListLogic<T> logic;
 
